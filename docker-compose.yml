@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+    get_video:
+        build: ./get_video
+        volumes:
+            - ./get_video:/video
+        command: bash get_video.sh
