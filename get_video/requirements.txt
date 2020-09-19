@@ -1,1 +1,4 @@
 youtube_dl
+beautifulsoup4
+requests
+retry

@@ -1,2 +1,4 @@
 /get_video/videos/*
 /get_video/crips/*
+/get_video/comments/*
+/get_video/__pycache__/*

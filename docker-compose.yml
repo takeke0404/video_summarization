@@ -5,4 +5,4 @@ services:
         build: ./get_video
         volumes:
             - ./get_video:/video
-        command: bash get_video.sh
+        command: bash -c "bash get_video.sh && bash get_comment.sh"
