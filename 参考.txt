@@ -1,2 +1,4 @@
-https://note.com/or_ele/n/n5fc139ff3f06 チャット取得
+https://note.com/or_ele/n/nd46e110173fd チャット取得
 https://masayoshi-9a7ee.hatenablog.com/entry/20150905/1441414821 youtube-dl
+https://db-event.jpn.org/deim2018/data/papers/267.pdf 視聴者の時刻同期コメントを用いた動画の特徴シーンの推定
+https://techacademy.jp/magazine/31149 PythonでDTW(Dynamic Time Warping)を実装する方法を現役エンジニアが解説【初心者向け】
