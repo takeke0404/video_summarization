@@ -14,6 +14,8 @@ do
     else
         echo "get comment $b"
         python -c "import get_comment; import sys; get_comment.get_comment_json(sys.argv[1],sys.argv[2])" $video_id "comments/$b.json"
+        chmod 777 "comments/$b.json"
     fi
 done < ./name_list.txt
+chmod 777 comments
 echo "get_comment is done"

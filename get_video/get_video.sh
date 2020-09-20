@@ -26,10 +26,14 @@ do
             name=("$filename")
         fi
     done
+    chmod 777 $name
     videolist+=("$name")
     name=${name##*/}
     name=${name%.*}
     youtube-dl -x --extract-audio --audio-quality 0 --audio-format wav --no-post-overwrites $a -o "crips/$name.%(ext)s"
+    chmod 777 "crips/$name.wav"
     echo $b $name >> name_list.txt
 done < ./list.txt
+chmod 777 name_list.txt
+chmod 777 videos
 echo "get_video is done"
