@@ -1,14 +1,19 @@
 #!/bin/sh
-while read a b
+while IFS=',' read a b
 do
     video_id=${a##*=}
-    filename_list=()
-    for filename in "comments/*"; do
-        filename_list+=("$filename")
+    flag=0
+    comments="comments/*"
+    for filename in $comments; do
+        if [ "$filename" = "comments/$b.json" ]; then
+            flag=1
+        fi
     done
-    if [[ $(printf '%s\n' "${filename_list[@]}" | grep -qx "comments/$b.json"; echo -n ${?} ) -eq 0 ]]; then
-        :
+    if [ $flag -eq 1 ]; then
+        echo "comments/$b.json is exists"
     else
-        python -c "import get_comment; get_comment.get_comment_json('$video_id','comments/$b.json')"
+        echo "get comment $b"
+        python -c "import get_comment; import sys; get_comment.get_comment_json(sys.argv[1],sys.argv[2])" $video_id "comments/$b.json"
     fi
 done < ./name_list.txt
+echo "get_comment is done"

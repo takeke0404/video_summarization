@@ -4,16 +4,20 @@ videolist=()
 for filename in $videos; do
     videolist+=("$filename")
 done
-name_list=()
-prv_video_list=()
 while read a b
 do
-    if [[ $(printf '%s\n' "${prv_video_list[@]}" | grep -qx "$b"; echo -n ${?} ) -eq 0 ]]; then
+    flag=0
+    while IFS=',' read c d
+    do
+        if [ "$c" = "$b" ]; then
+            flag=1
+        fi
+    done < name_list.txt
+    if [ $flag -eq 1 ]; then
+        echo "$b is exists"
         continue
     fi
-    prv_video_list+=("$b")
-    youtube-dl -x --extract-audio --audio-quality 0 --audio-format wav $b -o "videos/%(title)s.%(ext)s"
-    name_list+="$b "
+    youtube-dl -x --extract-audio --audio-quality 0 --audio-format wav --no-post-overwrites $b -o "videos/%(title)s.%(ext)s"
     name=""
     for filename in $videos; do
         if [[ $(printf '%s\n' "${videolist[@]}" | grep -qx "$filename"; echo -n ${?} ) -eq 0 ]]; then
@@ -25,8 +29,7 @@ do
     videolist+=("$name")
     name=${name##*/}
     name=${name%.*}
-    name_list+="$name"
-    name_list+=$'\n'
-    youtube-dl -x --extract-audio --audio-quality 0 --audio-format wav $a -o "crips/$name.%(ext)s"
+    youtube-dl -x --extract-audio --audio-quality 0 --audio-format wav --no-post-overwrites $a -o "crips/$name.%(ext)s"
+    echo $b $name >> name_list.txt
 done < ./list.txt
-echo $name_list > name_list.txt
+echo "get_video is done"
