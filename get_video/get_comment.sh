@@ -10,7 +10,7 @@ do
         fi
     done
     if [ $flag -eq 1 ]; then
-        echo "comments/$b.json is exists"
+        echo "comments/$b.json exists"
     else
         echo "get comment $b"
         python -c "import get_comment; import sys; get_comment.get_comment_json(sys.argv[1],sys.argv[2])" $video_id "comments/$b.json"

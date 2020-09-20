@@ -14,7 +14,7 @@ do
         fi
     done < name_list.txt
     if [ $flag -eq 1 ]; then
-        echo "$b is exists"
+        echo "$b exists"
         continue
     fi
     youtube-dl -x --extract-audio --audio-quality 0 --audio-format wav --no-post-overwrites $b -o "videos/%(title)s.%(ext)s"
