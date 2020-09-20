@@ -13,7 +13,7 @@ do
         echo "comments/$b.json exists"
     else
         echo "get comment $b"
-        python -c "import get_comment; import sys; get_comment.get_comment_json(sys.argv[1],sys.argv[2])" $video_id "comments/$b.json"
+        python -B -c "import get_comment; import sys; get_comment.get_comment_json(sys.argv[1],sys.argv[2])" $video_id "comments/$b.json"
         chmod 777 "comments/$b.json"
     fi
 done < ./name_list.txt
