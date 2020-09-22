@@ -6,3 +6,9 @@ services:
         volumes:
             - ./get_video:/video
         command: bash -c "bash get_video.sh && bash get_comment.sh"
+    get_crip_position:
+        build: ./get_crip_position
+        volumes:
+            - ./get_video:/get_video:ro
+            - ./get_crip_position:/get_crip_position
+        command: bash get_crip_position.sh

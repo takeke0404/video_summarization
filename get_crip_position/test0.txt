@@ -1,0 +1,16 @@
+../get_video/videos/＃16【Minecraft～にじ鯖～】住民厳選とお店つくり5日め　season2 【アルス・アルマル_にじさんじ】.wav
+channel:  2
+width:  2
+framerate:  48000
+frame:  1071455545
+1071455545
+int16
+../get_video/crips/＃16【Minecraft～にじ鯖～】住民厳選とお店つくり5日め　season2 【アルス・アルマル_にじさんじ】.wav
+channel:  2
+width:  2
+framerate:  48000
+frame:  3469931
+3469931
+int16
+平均:1.6626267743527199
+切り抜き:0/72 経過時間:0.0035881996154785156
