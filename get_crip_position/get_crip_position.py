@@ -15,11 +15,13 @@ def get_wave(file):
     # if width=2
     w = np.frombuffer(wf.readframes(-1), dtype="int16")
 
-    mw = w[ : : 2]
+    mw = np.empty(0,dtype="int16")
+    mw = np.append(mw,w[ : : 2*10])
     del w
     print(len(mw))
     print(mw.dtype)
-    return mw,wf.getframerate()
+    print(int(wf.getframerate()/10))
+    return mw,int(wf.getframerate()/10)
 
 def get_crip_position(video_filename,crip_filename):
     ow,ow_framerate = get_wave(video_filename)
@@ -28,10 +30,15 @@ def get_crip_position(video_filename,crip_filename):
     start = time.time()
 
     t_flag=0
+    not_match_flag=0
     start_pos=0
     estimated_delay=[]
     #cripの1秒ごとに一致する区間を探す
     for n in range(0,len(cw),ow_framerate):
+        if(not_match_flag==1):
+            not_match_flag=0
+            estimated_delay.append(None)
+            continue
         print("平均:"+str(((np.abs(cw[n:n+ow_framerate])**0.1).mean())))
         print("切り抜き:"+str(int(n/ow_framerate))+"/"+str(int(len(cw)/ow_framerate))+" 経過時間:"+str(time.time()-start))
         if(t_flag==1):
@@ -50,12 +57,13 @@ def get_crip_position(video_filename,crip_filename):
             else:
                 t_flag=0
         #元動画5分ごとに一致度の最大値をとる
-        for s in range(start_pos,len(ow)-len(cw)+1,ow_framerate*60*5):
+        cut_len=5
+        for s in range(start_pos,len(ow)-len(cw)+1,ow_framerate*60*cut_len):
             corr=0
-            ow_part = (ow[s:s+ow_framerate*60*5]-ow[s:s+ow_framerate*60*5].mean())/(np.std(ow[s:s+ow_framerate*60*5])*len(cw[n:n+ow_framerate]))
+            ow_part = (ow[s:s+ow_framerate*60*cut_len]-ow[s:s+ow_framerate*60*cut_len].mean())/(np.std(ow[s:s+ow_framerate*60*cut_len])*len(cw[n:n+ow_framerate]))
             cw_part = (cw[n:n+ow_framerate]-cw[n:n+ow_framerate].mean())/np.std(cw[n:n+ow_framerate])
             corr = np.correlate(ow_part,cw_part,"full")
-            print(str(int(s/(ow_framerate*60*5)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*5)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
+            print(str(int(s/(ow_framerate*60*cut_len)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*cut_len)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
             if(max(corr)>0.75):
                 estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
                 start_pos=s+corr.argmax()+1
@@ -63,20 +71,21 @@ def get_crip_position(video_filename,crip_filename):
                 break
         if(t_flag==1):
             continue
-        for s in range(0,start_pos,ow_framerate*60*5):
+        for s in range(0,start_pos,ow_framerate*60*cut_len):
             if(start_pos==0):
                 break
             corr=0
-            ow_part = (ow[s:s+ow_framerate*60*5]-ow[s:s+ow_framerate*60*5].mean())/(np.std(ow[s:s+ow_framerate*60*5])*len(cw[n:n+ow_framerate]))
+            ow_part = (ow[s:s+ow_framerate*60*cut_len]-ow[s:s+ow_framerate*60*cut_len].mean())/(np.std(ow[s:s+ow_framerate*60*cut_len])*len(cw[n:n+ow_framerate]))
             cw_part = (cw[n:n+ow_framerate]-cw[n:n+ow_framerate].mean())/np.std(cw[n:n+ow_framerate])
             corr = np.correlate(ow_part,cw_part,"full")
-            print(str(int(s/(ow_framerate*60*5)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*5)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
+            print(str(int(s/(ow_framerate*60*cut_len)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*cut_len)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
             if(max(corr)>0.75):
                 estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
                 start_pos=s+corr.argmax()+1
                 t_flag=1
                 break
         estimated_delay.append(None)
+        not_match_flag=1
 
     end = time.time()
     print("実行時間:"+str(end-start)+"s")

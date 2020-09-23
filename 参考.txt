@@ -1,6 +1,7 @@
 https://note.com/or_ele/n/nd46e110173fd チャット取得
 https://masayoshi-9a7ee.hatenablog.com/entry/20150905/1441414821 youtube-dl
 https://db-event.jpn.org/deim2018/data/papers/267.pdf 視聴者の時刻同期コメントを用いた動画の特徴シーンの推定
-https://ksknw.hatenablog.com/entry/2019/12/28/173331 部分一致DTW(SPRING)の実装
-https://www.semanticscholar.org/paper/Stream-Processing-under-the-Dynamic-Time-Warping-Faloutsos-Sakurai/794ed5f86c5ad30564def57b5425d3ea08b10be4?p2df Stream Processing under the Dynamic Time Warping Distance
 https://shigeo-t.hatenablog.com/entry/2019/11/24/050000 JuliusでYouTubeからダウンロードしたmp4の音声データを文字起こし練習　その1
+https://qiita.com/ikuo0/items/0d5798db824f3df074af 音声有効区間とモーラの検出
+https://ledge.ai/bert/ BERTとは｜Googleが誇る自然言語処理モデルの特徴、仕組みを解説
+https://qiita.com/g-k/items/5ea94c13281f675302ca Doc2Vecについてまとめる
