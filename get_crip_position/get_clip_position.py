@@ -23,7 +23,7 @@ def get_wave(file):
     print(int(wf.getframerate()/10))
     return mw,int(wf.getframerate()/10)
 
-def get_crip_position(video_filename,crip_filename):
+def get_clip_position(video_filename,crip_filename):
     ow,ow_framerate = get_wave(video_filename)
     cw,cw_framerate = get_wave(crip_filename)
 
@@ -92,16 +92,17 @@ def get_crip_position(video_filename,crip_filename):
 
     print(estimated_delay)
 
-    fig = plt.figure()
+    count=0
+    clipping_part=[]
+    pre=0
+    for s in estimated_delay:
+        if(s==None):
+            count++
+            continue
+        else:
+            if(pre!=0):
+                if(pre+ow_framerate+5>s and pre+ow_framerate-5<s):
 
-    plt.subplot(4, 1, 1)
-    plt.ylabel("original")
-    plt.plot(ow[estimated_delay[0]:estimated_delay[0]+ow_framerate])
-
-    plt.subplot(4, 1, 2)
-    plt.ylabel("crip")
-    plt.plot(cw[0:ow_framerate], color="g")
-
-    fig.savefig("plot.png")
-
+                    count=0
+                pre=s
     return
