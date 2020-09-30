@@ -3,6 +3,7 @@ import wave
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+from scipy import signal
 
 def get_wave(file):
     print(file)
@@ -39,14 +40,13 @@ def get_clip_position(video_filename,crip_filename):
             not_match_flag=0
             estimated_delay.append(None)
             continue
-        print("平均:"+str(((np.abs(cw[n:n+ow_framerate])**0.1).mean())))
         print("切り抜き:"+str(int(n/ow_framerate))+"/"+str(int(len(cw)/ow_framerate))+" 経過時間:"+str(time.time()-start))
         if(t_flag==1):
             ow_part = (ow[start_pos-1:start_pos+ow_framerate+10]-ow[start_pos-1:start_pos+ow_framerate+10].mean())/(np.std(ow[start_pos-1:start_pos+ow_framerate+10])*len(ow[start_pos-1:start_pos+ow_framerate+10]))
             if(n>len(cw)-ow_framerate):
                 ow_part = (ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]-ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10].mean())/(np.std(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10])*len(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]))
             cw_part = (cw[n:n+ow_framerate]-cw[n:n+ow_framerate].mean())/np.std(cw[n:n+ow_framerate])
-            corr = np.correlate(ow_part,cw_part,"full")
+            corr = signal.correlate(ow_part,cw_part,"full")
             print("start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(start_pos)+" max:"+str(max(corr)))
             if(max(corr)>0.75):
                 estimated_delay.append(start_pos)
@@ -62,7 +62,7 @@ def get_clip_position(video_filename,crip_filename):
             corr=0
             ow_part = (ow[s:s+ow_framerate*60*cut_len]-ow[s:s+ow_framerate*60*cut_len].mean())/(np.std(ow[s:s+ow_framerate*60*cut_len])*len(cw[n:n+ow_framerate]))
             cw_part = (cw[n:n+ow_framerate]-cw[n:n+ow_framerate].mean())/np.std(cw[n:n+ow_framerate])
-            corr = np.correlate(ow_part,cw_part,"full")
+            corr = signal.correlate(ow_part,cw_part,"full")
             print(str(int(s/(ow_framerate*60*cut_len)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*cut_len)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
             if(max(corr)>0.75):
                 estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
@@ -77,7 +77,7 @@ def get_clip_position(video_filename,crip_filename):
             corr=0
             ow_part = (ow[s:s+ow_framerate*60*cut_len]-ow[s:s+ow_framerate*60*cut_len].mean())/(np.std(ow[s:s+ow_framerate*60*cut_len])*len(cw[n:n+ow_framerate]))
             cw_part = (cw[n:n+ow_framerate]-cw[n:n+ow_framerate].mean())/np.std(cw[n:n+ow_framerate])
-            corr = np.correlate(ow_part,cw_part,"full")
+            corr = signal.correlate(ow_part,cw_part,"full")
             print(str(int(s/(ow_framerate*60*cut_len)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*cut_len)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
             if(max(corr)>0.75):
                 estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
@@ -92,17 +92,29 @@ def get_clip_position(video_filename,crip_filename):
 
     print(estimated_delay)
 
+    none_count=0
     count=0
     clipping_part=[]
-    pre=0
+    pre_part=-1
     for s in estimated_delay:
         if(s==None):
-            count++
-            continue
+            none_count+=count
+            count=0
+            none_count+=1
         else:
-            if(pre!=0):
-                if(pre+ow_framerate+5>s and pre+ow_framerate-5<s):
+            if(pre_part!=-1):
+                if(pre_part+ow_framerate+5>s and pre_part+ow_framerate-5<s):
+                    if(s==estimated_delay[-1]):
+                        clipping_part.append((pre_part-ow_framerate*(count+none_count),pre_part))
+                    count+=1
+                else:
+                    if(count!=0):
+                        clipping_part.append((pre_part-ow_framerate*(count+none_count),pre_part))
+                        none_count=0
+                        count=0
+                    else:
+                        none_count+=1
+            pre_part=s
 
-                    count=0
-                pre=s
+    print(clipping_part)
     return

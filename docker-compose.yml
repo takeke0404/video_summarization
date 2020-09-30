@@ -6,9 +6,9 @@ services:
         volumes:
             - ./get_video:/video
         command: bash -c "bash get_video.sh && bash get_comment.sh && bash change_permission.sh"
-    get_crip_position:
-        build: ./get_crip_position
+    get_clip_position:
+        build: ./get_clip_position
         volumes:
             - ./get_video:/get_video:ro
-            - ./get_crip_position:/get_crip_position
-        command: bash -c "bash get_crip_position.sh && bash change_permission.sh"
+            - ./get_clip_position:/get_clip_position
+        command: bash -c "bash get_clip_position.sh && bash change_permission.sh"

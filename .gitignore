@@ -1,8 +1,8 @@
 /get_video/videos/*
-/get_video/crips/*
+/get_video/clips/*
 /get_video/comments/*
 /get_video/__pycache__/*
 /get_video/name_list.txt
-/get_crip_position/positions/*
-/get_crip_position/output/*
+/get_clip_position/positions/*
+/get_clip_position/output/*
 /log_data/*

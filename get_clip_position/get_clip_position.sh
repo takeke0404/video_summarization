@@ -1,0 +1,4 @@
+#!/bin/sh
+python -B -u -c "import get_clip_position; import sys; get_clip_position.get_clip_position(sys.argv[1],sys.argv[2])" '../get_video/videos/＃16【Minecraft～にじ鯖～】住民厳選とお店つくり5日め　season2 【アルス・アルマル_にじさんじ】.wav' '../get_video/clips/＃16【Minecraft～にじ鯖～】住民厳選とお店つくり5日め　season2 【アルス・アルマル_にじさんじ】.wav' | tee output/test0.txt
+python -B -u -c "import get_clip_position; import sys; get_clip_position.get_clip_position(sys.argv[1],sys.argv[2])" '../get_video/videos/【#27歳ランク帯】加賀美インダストリアルに乗り込んで酒を飲む27歳児達【にじさんじ_夢追翔_加賀美ハヤト_社築】.wav' '../get_video/clips/【#27歳ランク帯】加賀美インダストリアルに乗り込んで酒を飲む27歳児達【にじさんじ_夢追翔_加賀美ハヤト_社築】.wav' | tee output/test1.txt
+python -B -u -c "import get_clip_position; import sys; get_clip_position.get_clip_position(sys.argv[1],sys.argv[2])" '../get_video/videos/同居ーず全員引っ越し完了！！！【ホロライブ _ #同居ーず】.wav' '../get_video/clips/同居ーず全員引っ越し完了！！！【ホロライブ _ #同居ーず】.wav' | tee output/test2.txt
