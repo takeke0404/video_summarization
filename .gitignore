@@ -5,4 +5,5 @@
 /get_video/name_list.txt
 /get_clip_position/positions/*
 /get_clip_position/output/*
+/get_clip_position/clips/*
 /log_data/*

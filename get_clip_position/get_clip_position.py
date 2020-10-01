@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from scipy import signal
+import os
 
 def get_wave(file):
     print(file)
@@ -23,6 +24,25 @@ def get_wave(file):
     print(mw.dtype)
     print(int(wf.getframerate()/10))
     return mw,int(wf.getframerate()/10)
+
+def write_wave(file,parts):
+
+    wf = wave.open(file, mode="rb")
+    w = np.frombuffer(wf.readframes(-1), dtype="int16")
+
+    mw = np.empty(0,dtype="int16")
+    mw = np.append(mw,w[ : : 2])
+    del w
+    ww = np.empty(0,dtype="int16")
+    for a,b in parts:
+        ww = np.append(ww,mw[a*10:b*10])
+
+    of = wave.open("clips/"+os.path.basename(file),"wb")
+    of.setparams((1,2,wf.getframerate(),len(ww),"NONE", "not compressed"))
+    of.writeframes(ww)
+    of.close()
+
+    return
 
 def get_clip_position(video_filename,crip_filename):
     ow,ow_framerate = get_wave(video_filename)
@@ -116,5 +136,6 @@ def get_clip_position(video_filename,crip_filename):
                         none_count+=1
             pre_part=s
 
+    write_wave(video_filename,clipping_part)
     print(clipping_part)
     return
