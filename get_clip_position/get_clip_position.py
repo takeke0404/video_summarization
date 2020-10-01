@@ -138,4 +138,9 @@ def get_clip_position(video_filename,crip_filename):
 
     write_wave(video_filename,clipping_part)
     print(clipping_part)
+
+    with open('positions/'+os.path.splitext(os.path.basename(video_filename))[0]+".txt",mode='w') as f:
+        for row in clipping_part:
+            print(*row, sep=',', file=f)
+
     return
