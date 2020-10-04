@@ -2,14 +2,7 @@
 while IFS=',' read a b
 do
     video_id=${a##*=}
-    flag=0
-    comments="comments/*"
-    for filename in $comments; do
-        if [ "$filename" = "comments/$b.json" ]; then
-            flag=1
-        fi
-    done
-    if [ $flag -eq 1 ]; then
+    if [ -f "./comments/$b.json" ]; then
         echo "comments/$b.json exists"
     else
         echo "get comment $b"

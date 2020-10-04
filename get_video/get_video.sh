@@ -32,7 +32,7 @@ do
     chmod 777 "videos/$name.wav"
     youtube-dl -x --extract-audio --audio-quality 0 --audio-format wav --no-post-overwrites $a -o "clips/$name.%(ext)s"
     chmod 777 "clips/$name.wav"
-    echo $b,$name >> name_list.txt
+    echo "$b,$name" >> name_list.txt
 done < ./list.txt
 chmod 777 name_list.txt
 chmod 777 videos

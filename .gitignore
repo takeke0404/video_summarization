@@ -6,4 +6,5 @@
 /get_clip_position/positions/*
 /get_clip_position/output/*
 /get_clip_position/clips/*
+/get_clip_position/__pycache__/*
 /log_data/*
