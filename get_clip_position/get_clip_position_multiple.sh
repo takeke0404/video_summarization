@@ -29,12 +29,13 @@ do
             for v in ${running_list[@]}; do
                 if [ "$v" = "$b" ]; then
                     unset running_list[$i]
-                    running_list=("${running_list[@]}")
                     mem_requrired=$(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K')
                     mem_requrired_sum=$(( $mem_requrired_sum-$mem_requrired ))
+                    break
                 fi
-                let i++
+                i=$(($i+1))
             done
+            running_list=("${running_list[@]}")
             continue
         else
             flag2=0
@@ -43,7 +44,6 @@ do
     if [ $flag2 = 1 ]; then
         flag=1
     fi
-    count=$(($count+1))
     sleep 10
 done
 echo "get_clip_position is done"
