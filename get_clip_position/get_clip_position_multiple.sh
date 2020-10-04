@@ -14,7 +14,7 @@ do
             mem_requrired=$(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K')
             mem_requrired_temp=$(( $mem_requrired_sum+$mem_requrired ))
             if [ $mem_requrired_temp -lt $MemTotal ]; then
-                bash get_clip_position.sh "$a" "$b" &
+                bash get_clip_position.sh "$a" "$b" > /dev/null &
                 running_list+=("$b")
                 mem_requrired_sum=$(( $mem_requrired_sum+$mem_requrired ))
             fi
@@ -29,13 +29,14 @@ do
             for v in ${running_list[@]}; do
                 if [ "$v" = "$b" ]; then
                     unset running_list[$i]
+                    running_list=(${running_list[@]})
                     mem_requrired=$(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K')
                     mem_requrired_sum=$(( $mem_requrired_sum-$mem_requrired ))
+                    echo "$b is done"
                     break
                 fi
                 i=$(($i+1))
             done
-            running_list=("${running_list[@]}")
             continue
         else
             flag2=0
@@ -44,6 +45,9 @@ do
     if [ $flag2 = 1 ]; then
         flag=1
     fi
-    sleep 10
+    sleep 20
+    echo "${running_list[@]}"
+    echo "$mem_requrired_sum/$MemTotal"
+    echo ""
 done
 echo "get_clip_position is done"
