@@ -11,4 +11,4 @@ services:
         volumes:
             - ./get_video:/get_video:ro
             - ./get_clip_position:/get_clip_position
-        command: bash -c "bash get_clip_position.sh && bash change_permission.sh"
+        command: bash -c "bash get_clip_position_multiple.sh && bash change_permission.sh"

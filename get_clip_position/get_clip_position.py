@@ -6,6 +6,8 @@ import time
 from scipy import signal
 import os
 
+skip=5
+
 def get_wave(file):
 
     print("LOAD", file)
@@ -46,8 +48,8 @@ def get_wave(file):
         mw = w
     elif channel == 2:
         # ステレオ
-        lw = w[ : : 2*10]
-        rw = w[1 : : 2*10]
+        lw = w[ : : 2*skip]
+        rw = w[1 : : 2*skip]
         mw = (lw >> 1) + (rw >> 1)
     else:
         mw = np.empty(0)
@@ -55,7 +57,7 @@ def get_wave(file):
     print(mw.shape)
 
     print()
-    return mw, int(framerate/10)
+    return mw, int(framerate/skip)
 
 def write_wave(file,parts):
 
@@ -92,7 +94,7 @@ def write_wave(file,parts):
         mw = np.empty(0)
     ww = np.empty(0,dtype="int16")
     for a,b in parts:
-        ww = np.append(ww,mw[a*10:b*10])
+        ww = np.append(ww,mw[a*skip:b*skip])
 
     of = wave.open("clips/"+os.path.basename(file),"wb")
     of.setparams((1,channel,wf.getframerate(),len(ww),"NONE", "not compressed"))
@@ -104,6 +106,9 @@ def write_wave(file,parts):
 def get_clip_position(video_filename,crip_filename):
     ow,ow_framerate = get_wave(video_filename)
     cw,cw_framerate = get_wave(crip_filename)
+
+    ow=ow*(32767/max(ow))
+    cw=cw*(32767/max(cw))
 
     start = time.time()
 
@@ -119,11 +124,11 @@ def get_clip_position(video_filename,crip_filename):
             continue
         print("切り抜き:"+str(int(n/ow_framerate))+"/"+str(int(len(cw)/ow_framerate))+" 経過時間:"+str(time.time()-start))
         if(t_flag==1):
-            ow_part = (ow[start_pos-1:start_pos+ow_framerate+10]-ow[start_pos-1:start_pos+ow_framerate+10].mean())/(np.std(ow[start_pos-1:start_pos+ow_framerate+10])*len(ow[start_pos-1:start_pos+ow_framerate+10]))
+            ow_part = (ow[start_pos-1:start_pos+ow_framerate+10]-ow[start_pos-1:start_pos+ow_framerate+10].mean())/(np.std(ow[start_pos-1:start_pos+ow_framerate+10]))
             if(n>len(cw)-ow_framerate):
-                ow_part = (ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]-ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10].mean())/(np.std(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10])*len(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]))
+                ow_part = (ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]-ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10].mean())/(np.std(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]))
             cw_part = (cw[n:n+ow_framerate]-cw[n:n+ow_framerate].mean())/np.std(cw[n:n+ow_framerate])
-            corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')
+            corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')/len(cw_part)
             print("start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(start_pos+corr.argmax()-(len(cw[n:n+ow_framerate])-1))+" max:"+str(max(corr)))
             if(max(corr)>0.6):
                 estimated_delay.append(start_pos+corr.argmax()-(len(cw[n:n+ow_framerate])-1))
@@ -135,9 +140,9 @@ def get_clip_position(video_filename,crip_filename):
         cut_len=5
         for s in range(start_pos,len(ow)-len(cw)+1,ow_framerate*60*cut_len):
             corr=0
-            ow_part = (ow[s:s+ow_framerate*60*cut_len]-ow[s:s+ow_framerate*60*cut_len].mean())/(np.std(ow[s:s+ow_framerate*60*cut_len])*len(cw[n:n+ow_framerate]))
+            ow_part = (ow[s:s+ow_framerate*60*cut_len]-ow[s:s+ow_framerate*60*cut_len].mean())/(np.std(ow[s:s+ow_framerate*60*cut_len]))
             cw_part = (cw[n:n+ow_framerate]-cw[n:n+ow_framerate].mean())/np.std(cw[n:n+ow_framerate])
-            corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')
+            corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')/len(cw_part)
             print(str(int(s/(ow_framerate*60*cut_len)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*cut_len)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
             if(t_flag==1 and s==start_pos):
                 if(ow_framerate-5<corr.argmax() and ow_framerate+5>corr.argmax()):
@@ -156,9 +161,9 @@ def get_clip_position(video_filename,crip_filename):
             if(start_pos==0):
                 break
             corr=0
-            ow_part = (ow[s:s+ow_framerate*60*cut_len]-ow[s:s+ow_framerate*60*cut_len].mean())/(np.std(ow[s:s+ow_framerate*60*cut_len])*len(cw[n:n+ow_framerate]))
+            ow_part = (ow[s:s+ow_framerate*60*cut_len]-ow[s:s+ow_framerate*60*cut_len].mean())/(np.std(ow[s:s+ow_framerate*60*cut_len]))
             cw_part = (cw[n:n+ow_framerate]-cw[n:n+ow_framerate].mean())/np.std(cw[n:n+ow_framerate])
-            corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')
+            corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')/len(cw_part)
             print(str(int(s/(ow_framerate*60*cut_len)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*cut_len)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
             if(max(corr)>0.75):
                 estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
@@ -193,7 +198,7 @@ def get_clip_position(video_filename,crip_filename):
                             clipping_part.append((s-ow_framerate*(count+none_count),s+ow_framerate))
                     elif(i!=len(estimated_delay)-1 and estimated_delay[i+1]==None):
                         a,b = clipping_part[-1]
-                        if(b==s-ow_framerate*(count+none_count)):
+                        if(b>=s-ow_framerate*(count+none_count) and a<s-ow_framerate*(count+none_count)):
                             clipping_part[-1] = (a,s+ow_framerate)
                         else:
                             clipping_part.append((s-ow_framerate*(count+none_count),s+ow_framerate))
