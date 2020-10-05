@@ -21,6 +21,7 @@ def get_wave(file):
 
     if frame < 1000000000:
         buffer = wf.readframes(-1)
+        wf.close()
     else:
         print("RELOAD")
         wf.close()
@@ -55,7 +56,6 @@ def get_wave(file):
         mw = np.empty(0)
 
     print(mw.shape)
-    del w
     print()
     return mw, int(framerate/SKIP)
 
@@ -68,6 +68,7 @@ def write_wave(file,parts):
 
     if wf.getnframes() < 1000000000:
         buffer = wf.readframes(-1)
+        wf.close()
     else:
         wf.close()
         print("RELOAD")
