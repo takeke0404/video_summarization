@@ -27,8 +27,9 @@ do
     do
         if [ -f "./positions/$b.csv" ]; then
             for ((i = 0; i < ${#running_list[@]}; i++)); do
+                IFS="\n"
                 if [ "${running_list[$i]}" = "$b" ]; then
-                    unset running_list[$i]
+                    running_list[$i] = ""
                     mem_requrired=$(( $(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K') + $(ls -hl --block-size=K -R '../get_video/clips' | grep "$b" | awk '{print $5}' | tr -d 'K')*2 ))
                     mem_requrired=$(($mem_requrired*3/2))
                     mem_requrired_sum=$(( $mem_requrired_sum-$mem_requrired ))
@@ -51,7 +52,7 @@ do
             temp_list+=("${running_list[$i]}")
         fi
     done
-    running_list=$temp_list
+    running_list=("${temp_list[@]}")
     for ((i = 0; i < ${#running_list[@]}; i++)); do
         echo "${running_list[$i]}"
     done

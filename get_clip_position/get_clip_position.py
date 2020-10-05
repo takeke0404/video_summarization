@@ -145,7 +145,7 @@ def get_clip_position(video_filename,crip_filename):
                 continue
         #元動画5分ごとに一致度の最大値をとる
         cut_len=5
-        for s in range(start_pos,len(ow)-len(cw)+1,ow_framerate*60*cut_len):
+        for s in range(start_pos,len(ow)-ow_framerate+1,ow_framerate*60*cut_len):
             corr=0
             ow_part = (ow[s:s+ow_framerate*60*cut_len]-np.mean(ow[s:s+ow_framerate*60*cut_len]))
             if(np.std(ow[s:s+ow_framerate*60*cut_len])!=0):
