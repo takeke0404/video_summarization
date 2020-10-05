@@ -55,7 +55,7 @@ def get_wave(file):
         mw = np.empty(0)
 
     print(mw.shape)
-
+    del w
     print()
     return mw, int(framerate/SKIP)
 
@@ -63,10 +63,13 @@ def write_wave(file,parts):
 
     wf = wave.open(file, mode="rb")
     channel = wf.getnchannels()
+    framerate = wf.getframerate()
+    sampwidth = wf.getsampwidth()
 
     if wf.getnframes() < 1000000000:
         buffer = wf.readframes(-1)
     else:
+        wf.close()
         print("RELOAD")
         wf2 = open(file, "rb")
         print("", wf2.read(4)) # RIFF
@@ -97,7 +100,7 @@ def write_wave(file,parts):
         ww = np.append(ww,mw[a:b])
 
     of = wave.open("clips/"+os.path.basename(file),"wb")
-    of.setparams((1,channel,wf.getframerate(),len(ww),"NONE", "not compressed"))
+    of.setparams((channel,sampwidth,framerate,len(ww),"NONE", "not compressed"))
     of.writeframes(ww)
     of.close()
 
@@ -106,9 +109,6 @@ def write_wave(file,parts):
 def get_clip_position(video_filename,crip_filename):
     ow,ow_framerate = get_wave(video_filename)
     cw,cw_framerate = get_wave(crip_filename)
-
-    ow=ow*(32767/max(ow))
-    cw=cw*(32767/max(cw))
 
     start = time.time()
 
@@ -222,7 +222,10 @@ def get_clip_position(video_filename,crip_filename):
             pre_part=s
 
     clipping_part.pop(0)
-    clipping_part*=SKIP
+    del ow,cw
+    for i in range(len(clipping_part)):
+        a,b=clipping_part[i]
+        clipping_part[i]=(a*SKIP,b*SKIP)
     write_wave(video_filename,clipping_part)
     print(clipping_part)
 
