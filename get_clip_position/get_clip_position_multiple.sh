@@ -29,7 +29,6 @@ do
             for ((i = 0; i < ${#running_list[@]}; i++)); do
                 if [ "${running_list[$i]}" = "$b" ]; then
                     unset running_list[$i]
-                    running_list=(${running_list[@]})
                     mem_requrired=$(( $(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K') + $(ls -hl --block-size=K -R '../get_video/clips' | grep "$b" | awk '{print $5}' | tr -d 'K')*2 ))
                     mem_requrired=$(($mem_requrired*3/2))
                     mem_requrired_sum=$(( $mem_requrired_sum-$mem_requrired ))
@@ -46,7 +45,16 @@ do
         flag=1
     fi
     sleep 20
-    echo "${running_list[@]}"
+    temp_list=()
+    for ((i = 0; i < ${#running_list[@]}; i++)); do
+        if [ -n "${running_list[$i]}" ]; then
+            temp_list+=("${running_list[$i]}")
+        fi
+    done
+    running_list=$temp_list
+    for ((i = 0; i < ${#running_list[@]}; i++)); do
+        echo "${running_list[$i]}"
+    done
     echo "$mem_requrired_sum/$MemTotal"
     echo ""
 done
