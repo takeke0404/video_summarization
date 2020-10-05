@@ -26,15 +26,15 @@ do
             name=("$filename")
         fi
     done
-    ffmpeg -y -i "$name" -ar 48000 -ac 1 "videos/output.wav" > /dev/null
-    yes | mv "videos/output.wav" "$name"
+    ffmpeg -hide_banner -loglevel panic -i "$name" -ar 48000 -ac 1 "videos/output.wav" </dev/null &>/dev/null
+    mv -f "videos/output.wav" "$name"
     videolist+=("$name")
     name=${name##*/}
     name=${name%.*}
     chmod 777 "videos/$name.wav"
     youtube-dl -x --extract-audio --audio-quality 0 --audio-format wav --no-post-overwrites $a -o "clips/$name.%(ext)s"
-    ffmpeg -y -i "clips/$name.wav" -ar 48000 -ac 1 "clips/output.wav" > /dev/null
-    yes | mv "clips/output.wav" "clips/$name.wav"
+    ffmpeg -hide_banner -loglevel panic -i "clips/$name.wav" -ar 48000 -ac 1 "clips/output.wav" </dev/null &>/dev/null
+    mv -f "clips/output.wav" "clips/$name.wav"
     chmod 777 "clips/$name.wav"
     echo "$b,$name" >> name_list.txt
 done < ./list.txt
