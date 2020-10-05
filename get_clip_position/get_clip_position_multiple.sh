@@ -26,9 +26,8 @@ do
     while IFS=',' read a b
     do
         if [ -f "./positions/$b.csv" ]; then
-            i=0
-            for v in ${running_list[@]}; do
-                if [ "$v" = "$b" ]; then
+            for ((i = 0; i < ${#running_list[@]}; i++)); do
+                if [ "${running_list[$i]}" = "$b" ]; then
                     unset running_list[$i]
                     running_list=(${running_list[@]})
                     mem_requrired=$(( $(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K') + $(ls -hl --block-size=K -R '../get_video/clips' | grep "$b" | awk '{print $5}' | tr -d 'K') ))
@@ -37,7 +36,6 @@ do
                     echo "$b is done"
                     break
                 fi
-                i=$(($i+1))
             done
             continue
         else

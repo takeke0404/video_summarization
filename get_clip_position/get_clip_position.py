@@ -6,7 +6,7 @@ import time
 from scipy import signal
 import os
 
-SKIP=5
+SKIP=1
 
 def get_wave(file):
 
@@ -124,10 +124,16 @@ def get_clip_position(video_filename,crip_filename):
             continue
         print("切り抜き:"+str(int(n/ow_framerate))+"/"+str(int(len(cw)/ow_framerate))+" 経過時間:"+str(time.time()-start))
         if(t_flag==1):
-            ow_part = (ow[start_pos-1:start_pos+ow_framerate+10]-np.mean(ow[start_pos-1:start_pos+ow_framerate+10]))/(np.std(ow[start_pos-1:start_pos+ow_framerate+10]))
+            ow_part = (ow[start_pos-1:start_pos+ow_framerate+10]-np.mean(ow[start_pos-1:start_pos+ow_framerate+10]))
+            if(np.std(ow[start_pos-1:start_pos+ow_framerate+10])!=0):
+                ow_part/=(np.std(ow[start_pos-1:start_pos+ow_framerate+10]))
             if(n>len(cw)-ow_framerate):
-                ow_part = (ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]-np.mean(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]))/(np.std(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]))
-            cw_part = (cw[n:n+ow_framerate]-np.mean(cw[n:n+ow_framerate]))/np.std(cw[n:n+ow_framerate])
+                ow_part = (ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]-np.mean(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10]))
+                if(np.std(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10])!=0):
+                    ow_part/=np.std(ow[start_pos-1:start_pos+len(cw[n:n+ow_framerate])+10])
+            cw_part = (cw[n:n+ow_framerate]-np.mean(cw[n:n+ow_framerate]))
+            if(np.std(cw[n:n+ow_framerate])!=0):
+                cw_part/=np.std(cw[n:n+ow_framerate])
             corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')/len(cw_part)
             print("start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(start_pos+corr.argmax()-(len(cw[n:n+ow_framerate])-1))+" max:"+str(max(corr)))
             if(max(corr)>0.6):
@@ -140,8 +146,12 @@ def get_clip_position(video_filename,crip_filename):
         cut_len=5
         for s in range(start_pos,len(ow)-len(cw)+1,ow_framerate*60*cut_len):
             corr=0
-            ow_part = (ow[s:s+ow_framerate*60*cut_len]-np.mean(ow[s:s+ow_framerate*60*cut_len]))/(np.std(ow[s:s+ow_framerate*60*cut_len]))
-            cw_part = (cw[n:n+ow_framerate]-np.mean(cw[n:n+ow_framerate]))/np.std(cw[n:n+ow_framerate])
+            ow_part = (ow[s:s+ow_framerate*60*cut_len]-np.mean(ow[s:s+ow_framerate*60*cut_len]))
+            if(np.std(ow[s:s+ow_framerate*60*cut_len])!=0):
+                ow_part/=(np.std(ow[s:s+ow_framerate*60*cut_len]))
+            cw_part = (cw[n:n+ow_framerate]-np.mean(cw[n:n+ow_framerate]))
+            if(np.std(cw[n:n+ow_framerate])!=0):
+                cw_part/=np.std(cw[n:n+ow_framerate])
             corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')/len(cw_part)
             print(str(int(s/(ow_framerate*60*cut_len)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*cut_len)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
             if(t_flag==1 and s==start_pos):
@@ -161,8 +171,12 @@ def get_clip_position(video_filename,crip_filename):
             if(start_pos==0):
                 break
             corr=0
-            ow_part = (ow[s:s+ow_framerate*60*cut_len]-np.mean(ow[s:s+ow_framerate*60*cut_len]))/(np.std(ow[s:s+ow_framerate*60*cut_len]))
-            cw_part = (cw[n:n+ow_framerate]-np.mean(cw[n:n+ow_framerate]))/np.std(cw[n:n+ow_framerate])
+            ow_part = (ow[s:s+ow_framerate*60*cut_len]-np.mean(ow[s:s+ow_framerate*60*cut_len]))
+            if(np.std(ow[s:s+ow_framerate*60*cut_len])!=0):
+                ow_part/=(np.std(ow[s:s+ow_framerate*60*cut_len]))
+            cw_part = (cw[n:n+ow_framerate]-np.mean(cw[n:n+ow_framerate]))
+            if(np.std(cw[n:n+ow_framerate])!=0):
+                cw_part/=(np.std(cw[n:n+ow_framerate]))
             corr = signal.correlate(ow_part,cw_part,mode='full',method='auto')/len(cw_part)
             print(str(int(s/(ow_framerate*60*cut_len)))+"/"+str(int((len(ow)-len(cw)+1)/(ow_framerate*60*cut_len)))+" start_pos:"+str(start_pos)+" corr.argmax:"+str(corr.argmax())+" pos:"+str(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))+" max:"+str(max(corr)))
             if(max(corr)>0.75):
