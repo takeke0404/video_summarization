@@ -12,3 +12,10 @@ services:
             - ./get_video:/get_video:ro
             - ./get_clip_position:/get_clip_position
         command: bash -c "bash get_clip_position_multiple.sh && bash change_permission.sh"
+    analyze_comment:
+        build: ./analyze_comment
+        volumes:
+            - ./analyze_comment:/analyze_comment
+            - ./get_video:/get_video
+            - ./get_clip_position:/get_clip_position
+        command: bash -c "bash plot_comment.sh && bash get_clip_comment.sh && bash change_permission.sh"
