@@ -7,7 +7,7 @@ while [ $flag = 0 ]
 do
     while IFS=',' read a b
     do
-        if [ -f "./positions/$b.txt" ] || [[ $(printf '%s\n' "${running_list[@]}" | grep -qx "$b"; echo -n ${?} ) -eq 0 ]]; then
+        if [ -f "./positions/$b.csv" ] || [[ $(printf '%s\n' "${running_list[@]}" | grep -qx "$b"; echo -n ${?} ) -eq 0 ]]; then
             :
         else
             mem_free=$(cat /proc/meminfo | grep MemAvailable | awk '{print $2}')
@@ -24,7 +24,7 @@ do
     flag2=1
     while IFS=',' read a b
     do
-        if [ -f "./positions/$b.txt" ]; then
+        if [ -f "./positions/$b.csv" ]; then
             i=0
             for v in ${running_list[@]}; do
                 if [ "$v" = "$b" ]; then

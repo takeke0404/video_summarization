@@ -6,7 +6,7 @@ import time
 from scipy import signal
 import os
 
-skip=5
+SKIP=5
 
 def get_wave(file):
 
@@ -45,11 +45,11 @@ def get_wave(file):
 
     if channel == 1:
         # モノラル
-        mw = w
+        mw = w[ : : SKIP]
     elif channel == 2:
         # ステレオ
-        lw = w[ : : 2*skip]
-        rw = w[1 : : 2*skip]
+        lw = w[ : : 2*SKIP]
+        rw = w[1 : : 2*SKIP]
         mw = (lw >> 1) + (rw >> 1)
     else:
         mw = np.empty(0)
@@ -57,7 +57,7 @@ def get_wave(file):
     print(mw.shape)
 
     print()
-    return mw, int(framerate/skip)
+    return mw, int(framerate/SKIP)
 
 def write_wave(file,parts):
 
@@ -94,7 +94,7 @@ def write_wave(file,parts):
         mw = np.empty(0)
     ww = np.empty(0,dtype="int16")
     for a,b in parts:
-        ww = np.append(ww,mw[a*skip:b*skip])
+        ww = np.append(ww,mw[a:b])
 
     of = wave.open("clips/"+os.path.basename(file),"wb")
     of.setparams((1,channel,wf.getframerate(),len(ww),"NONE", "not compressed"))
@@ -222,10 +222,11 @@ def get_clip_position(video_filename,crip_filename):
             pre_part=s
 
     clipping_part.pop(0)
+    clipping_part*=SKIP
     write_wave(video_filename,clipping_part)
     print(clipping_part)
 
-    with open('positions/'+os.path.splitext(os.path.basename(video_filename))[0]+".txt",mode='w') as f:
+    with open('positions/'+os.path.splitext(os.path.basename(video_filename))[0]+".csv",mode='w') as f:
         for row in clipping_part:
             print(*row, sep=',', file=f)
 
