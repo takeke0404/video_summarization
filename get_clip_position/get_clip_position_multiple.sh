@@ -29,7 +29,7 @@ do
             for ((i = 0; i < ${#running_list[@]}; i++)); do
                 IFS="\n"
                 if [ "${running_list[$i]}" = "$b" ]; then
-                    running_list[$i] = ""
+                    unset running_list[$i]
                     mem_requrired=$(( $(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K') + $(ls -hl --block-size=K -R '../get_video/clips' | grep "$b" | awk '{print $5}' | tr -d 'K')*2 ))
                     mem_requrired=$(($mem_requrired*3/2))
                     mem_requrired_sum=$(( $mem_requrired_sum-$mem_requrired ))
