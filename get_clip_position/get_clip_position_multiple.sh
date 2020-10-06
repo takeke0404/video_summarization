@@ -22,12 +22,12 @@ do
         fi
     done < ../get_video/name_list.txt
 
+    list_size=${#running_list[@]}
     flag2=1
     while IFS=',' read a b
     do
         if [ -f "./positions/$b.csv" ]; then
             for ((i = 0; i < ${#running_list[@]}; i++)); do
-                IFS="\n"
                 if [ "${running_list[$i]}" = "$b" ]; then
                     unset running_list[$i]
                     mem_requrired=$(( $(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K') + $(ls -hl --block-size=K -R '../get_video/clips' | grep "$b" | awk '{print $5}' | tr -d 'K')*2 ))
@@ -37,7 +37,6 @@ do
                     break
                 fi
             done
-            continue
         else
             flag2=0
         fi
@@ -45,18 +44,20 @@ do
     if [ $flag2 = 1 ]; then
         flag=1
     fi
-    sleep 20
+
     temp_list=()
-    for ((i = 0; i < ${#running_list[@]}; i++)); do
+    for ((i = 0; i < $list_size; i++)); do
         if [ -n "${running_list[$i]}" ]; then
             temp_list+=("${running_list[$i]}")
         fi
     done
     running_list=("${temp_list[@]}")
+
     for ((i = 0; i < ${#running_list[@]}; i++)); do
         echo "${running_list[$i]}"
     done
     echo "$mem_requrired_sum/$MemTotal"
     echo ""
+    sleep 20
 done
 echo "get_clip_position is done"
