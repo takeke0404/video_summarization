@@ -159,7 +159,7 @@ def get_clip_position(video_filename,crip_filename):
                 if(ow_framerate-5<corr.argmax() and ow_framerate+5>corr.argmax()):
                     estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
                     start_pos=s+corr.argmax()+1
-                    continue
+                    break
                 t_flag=0
             if(max(corr)>0.75):
                 estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))

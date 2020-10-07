@@ -12,7 +12,7 @@ do
         else
             mem_free=$(cat /proc/meminfo | grep MemAvailable | awk '{print $2}')
             mem_requrired=$(( $(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K') + $(ls -hl --block-size=K -R '../get_video/clips' | grep "$b" | awk '{print $5}' | tr -d 'K')*2 ))
-            mem_requrired=$(($mem_requrired*3/2))
+            mem_requrired=$(($mem_requrired*2))
             mem_requrired_temp=$(( $mem_requrired_sum+$mem_requrired ))
             if [ $mem_requrired_temp -lt $MemTotal ]; then
                 bash get_clip_position.sh "$a" "$b" > /dev/null &
@@ -31,7 +31,7 @@ do
                 if [ "${running_list[$i]}" = "$b" ]; then
                     unset running_list[$i]
                     mem_requrired=$(( $(ls -hl --block-size=K -R '../get_video/videos' | grep "$b" | awk '{print $5}' | tr -d 'K') + $(ls -hl --block-size=K -R '../get_video/clips' | grep "$b" | awk '{print $5}' | tr -d 'K')*2 ))
-                    mem_requrired=$(($mem_requrired*3/2))
+                    mem_requrired=$(($mem_requrired*2))
                     mem_requrired_sum=$(( $mem_requrired_sum-$mem_requrired ))
                     echo "$b is done"
                     break
