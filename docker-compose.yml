@@ -19,3 +19,10 @@ services:
             - ./get_video:/get_video
             - ./get_clip_position:/get_clip_position
         command: bash -c "bash plot_comment.sh && bash get_clip_comment.sh && bash change_permission.sh"
+    speech_segmentation:
+        build: ./speech_segmentation
+        volumes:
+            - ./speech_segmentation:/speech_segmentation
+            - ./get_video:/get_video
+            - ./get_clip_position:/get_clip_position
+        command: bash -c "bash speech_segmentation.sh"
