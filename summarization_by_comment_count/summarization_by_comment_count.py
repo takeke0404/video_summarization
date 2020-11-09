@@ -47,7 +47,14 @@ def main(name):
     print(clip_segment)
     output_comment(name,clip_segment,comments_list)
     output_wav(name,clip_segment)
+    # urlを先頭につけてcsvで書き出し
+    url=""
+    with open('../get_video/name_list.txt') as f:
+        for video_url,video_name in csv.reader(f):
+            if(video_name==name):
+                url=video_url
     with open('result/'+name+".csv",mode='w') as f:
+        print(*url, sep='',file=f)
         for type,start,end in clip_segment:
             print(*(start,end), sep=',', file=f)
     return
