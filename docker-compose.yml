@@ -26,3 +26,11 @@ services:
             - ./get_video:/get_video
             - ./get_clip_position:/get_clip_position
         command: bash -c "bash speech_segmentation.sh"
+    summarization_by_comment_count:
+        build: ./summarization_by_comment_count
+        volumes:
+            - ./summarization_by_comment_count:/summarization_by_comment_count
+            - ./speech_segmentation:/speech_segmentation
+            - ./get_video:/get_video
+            - ./get_clip_position:/get_clip_position
+        command: bash -c "bash summarization_by_comment_count.sh"
