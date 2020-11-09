@@ -13,7 +13,7 @@ def main(comment_file):
     for comment in comments_json:
         comments_list.append((time2sec(comment["time"]), comment["text"]))
 
-    #  範囲のコメントをファイル出力
+    # 範囲のコメントをファイル出力
     clip_comment = []
     with open("../get_clip_position/positions/"+comment_file_name+".csv") as f:
         for row in csv.reader(f):

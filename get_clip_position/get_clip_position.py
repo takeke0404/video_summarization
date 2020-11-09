@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import time
 from scipy import signal
 import os
+import gc
 
 SKIP=1
 
@@ -13,7 +14,7 @@ def get_wave(file):
     print("LOAD", file)
     wf = wave.open(file, mode = "rb")
     framerate = wf.getframerate()
-    frame = wf.getnframes() # 異なる場合があります
+    frame = wf.getnframes()
     sampwidth = wf.getsampwidth()
     channel = wf.getnchannels()
     print(" framerate:", framerate)
@@ -54,7 +55,7 @@ def get_wave(file):
         mw = (lw >> 1) + (rw >> 1)
     else:
         mw = np.empty(0)
-
+    del w
     print(mw.shape)
     print()
     return mw, int(framerate/SKIP)
@@ -143,6 +144,7 @@ def get_clip_position(video_filename,crip_filename):
                     start_pos=0
                 start_pos=start_pos+ow_framerate+1
                 continue
+            del ow_part,corr
         #元動画5分ごとに一致度の最大値をとる
         cut_len=5
         for s in range(start_pos,len(ow)-ow_framerate+1,ow_framerate*60*cut_len):
@@ -159,13 +161,16 @@ def get_clip_position(video_filename,crip_filename):
                 if(ow_framerate-5<corr.argmax() and ow_framerate+5>corr.argmax()):
                     estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
                     start_pos=s+corr.argmax()+1
+                    del ow_part,corr
                     break
                 t_flag=0
             if(max(corr)>0.75):
                 estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
                 start_pos=s+corr.argmax()+1
                 t_flag=1
+                del ow_part,corr
                 break
+            del ow_part,corr
         if(t_flag==1):
             continue
         for s in range(0,start_pos,ow_framerate*60*cut_len):
@@ -184,9 +189,12 @@ def get_clip_position(video_filename,crip_filename):
                 estimated_delay.append(s+corr.argmax()-(len(cw[n:n+ow_framerate]) - 1))
                 start_pos=s+corr.argmax()+1
                 t_flag=1
+                del ow_part,corr
                 break
+            del ow_part,corr
         estimated_delay.append(None)
         not_match_flag=1
+        gc.collect()
 
     end = time.time()
     print("実行時間:"+str(end-start)+"s")
