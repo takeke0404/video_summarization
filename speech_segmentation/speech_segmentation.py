@@ -14,7 +14,7 @@ def main(name):
 
     with open('segmentation/'+name+".csv",mode='w') as f:
         for type,start,end in segmentation:
-            print(*(type,int(start),int(end)), sep=',', file=f)
+            print(*(type,start,end), sep=',', file=f)
 
 if __name__ == "__main__":
     args = sys.argv
