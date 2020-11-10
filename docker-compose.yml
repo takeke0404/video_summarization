@@ -34,3 +34,13 @@ services:
             - ./get_video:/get_video
             - ./get_clip_position:/get_clip_position
         command: bash -c "bash summarization_by_comment_count.sh"
+    web:
+        build: ./web
+        ports:
+          - 80:80
+        volumes:
+          - ./web:/web
+        tty: true
+        environment:
+          TZ: Asia/Tokyo
+        command: python3 app.py
