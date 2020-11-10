@@ -6,6 +6,7 @@ import csv
 import wave
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+clip_length=300
 
 def main(name):
     # 読み込み
@@ -18,35 +19,47 @@ def main(name):
             continue
         comments_list.append((time2sec(comment["time"]), comment["text"]))
 
-    # 時間当たりコメント数(10秒後までの畳み込み和,上位20件)
-    comment_begin = comments_list[0][0]
-    comment_end = comments_list[-1][0]
-    comments_per_sec = np.zeros(comment_end - comment_begin + 1)
-    for comment in comments_list:
-        comments_per_sec[comment[0] - comment_begin] += 1
-    comment_count = np.convolve(comments_per_sec,[1]*10,)[10:]
-    times = np.sort(np.argpartition(comment_count, -50)[-50:])
+    n=0
+    flag=True
+    clip_segments = []
+    while flag:
+        n+=1
+        # 時間当たりコメント数(10-40秒までの畳み込み和,要約の長さまで上位n件)
+        comment_begin = comments_list[0][0]
+        comment_end = comments_list[-1][0]
+        comments_per_sec = np.zeros(comment_end - comment_begin + 1)
+        for comment in comments_list:
+            comments_per_sec[comment[0] - comment_begin] += 1
+        comment_count = np.convolve(comments_per_sec,[0]*10+[2]*10+[1]*20,)[40:]
+        times = np.sort(np.argpartition(comment_count, -n)[-n:])
 
-    # コメントが多かった部分を含む音声区間を抽出
-    clip_segment = []
-    with open("../speech_segmentation/segmentation/"+name+".csv") as f:
-        prev = ("",0,0)
-        for type,start,end in csv.reader(f):
-            for time in times:
-                if(int(start)<=time and time<=int(end)):
-                    # 検出された区間のひとつ前のnoEnergy,noise以外の区間を結合
-                    clip_segment.append(prev)
-                    # 検出された区間の結合
-                    clip_segment.append((type,int(start),int(end)))
-            if (type != "noEnergy" and type != "noise"):
-                prev = (type,int(start),int(end))
-        clip_segment = list(dict.fromkeys(clip_segment))
-    # 前の区間と5秒以上空いていない区間同士を結合
-    clip_segment = taple_join(clip_segment,5)
+        # コメントが多かった部分を含む音声区間を抽出
+        segments = []
+        with open("../speech_segmentation/segmentation/"+name+".csv") as f:
+            prev = ("",0,0)
+            for type,start,end in csv.reader(f):
+                for time in times:
+                    if(float(start)<=time and time<=float(end)):
+                        # 検出された区間のひとつ前のnoEnergy,noise以外の区間を結合
+                        segments.append(prev)
+                        # 検出された区間の結合
+                        segments.append((type,float(start),float(end)))
+                if (type != "noEnergy" and type != "noise"):
+                    prev = (type,float(start),float(end))
+            segments = list(dict.fromkeys(segments))
+        # 前の区間と5秒以上空いていない区間同士を結合
+        segments = taple_join(segments,5)
+        len=0
+        for t,s,e in segments:
+            len+=e-s
+        if (len>clip_length):
+            flag=False
+        else:
+            clip_segments=segments
 
-    print(clip_segment)
-    output_comment(name,clip_segment,comments_list)
-    output_wav(name,clip_segment)
+    print(clip_segments)
+    output_comment(name,clip_segments,comments_list)
+    output_wav(name,clip_segments)
     # urlを先頭につけてcsvで書き出し
     url=""
     with open('../get_video/name_list.txt') as f:
@@ -55,8 +68,8 @@ def main(name):
                 url=video_url
     with open('result/'+name+".csv",mode='w') as f:
         print(*url, sep='',file=f)
-        for type,start,end in clip_segment:
-            print(*(start,end), sep=',', file=f)
+        for type,start,end in clip_segments:
+            print(*(round(start,2),round(end,2)), sep=',', file=f)
     return
 
 def time2sec(time_str):
@@ -83,7 +96,7 @@ def taple_join(taple,n):
             result.append((typet,st,et))
     return result
 
-def output_wav(name,clip_segment):
+def output_wav(name,clip_segments):
     # 音声clip出力
     wf = wave.open('../get_video/videos/'+name+'.wav', mode="rb")
     channel = wf.getnchannels()
@@ -96,7 +109,7 @@ def output_wav(name,clip_segment):
     else:
         wf.close()
         print("RELOAD")
-        wf2 = open(file, "rb")
+        wf2 = open('../get_video/videos/'+name+'.wav', "rb")
         print("", wf2.read(4)) # RIFF
         wf2.read(4) # ファイルサイズ
         print("", wf2.read(4)) # WAVE
@@ -121,8 +134,8 @@ def output_wav(name,clip_segment):
     else:
         mw = np.empty(0)
     ww = np.empty(0,dtype="int16")
-    for type,start,end in clip_segment:
-        ww = np.append(ww,mw[start*framerate:end*framerate])
+    for type,start,end in clip_segments:
+        ww = np.append(ww,mw[int(round(start,2)*framerate):int(round(end,2)*framerate)])
 
     of = wave.open("clips/"+name+".wav","wb")
     of.setparams((channel,sampwidth,framerate,len(ww),"NONE", "not compressed"))
@@ -130,10 +143,10 @@ def output_wav(name,clip_segment):
     of.close()
     return
 
-def output_comment(name,clip_segment,comments_list):
+def output_comment(name,clip_segments,comments_list):
     #  範囲のコメントをファイル出力
     clip_comment = []
-    for type,start,end in clip_segment:
+    for type,start,end in clip_segments:
         for comment in comments_list:
             time,text = comment
             if( start<time and time<end+10 ):
