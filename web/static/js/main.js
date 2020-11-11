@@ -11,8 +11,13 @@ var current_segment_index = 0;
 
 function onPlayerReady(event) {
     player.seekTo(parseFloat(clip_segments[current_segment_index][0],10));
-    setTimeout(nextSegment, (parseFloat(clip_segments[current_segment_index][1],10)-parseFloat(clip_segments[current_segment_index][0],10))*1000+100);
-    console.log(parseFloat(clip_segments[current_segment_index][0],10));
+}
+
+function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.PLAYING) {
+        setTimeout(nextSegment, (parseFloat(clip_segments[current_segment_index][1],10)-parseFloat(clip_segments[current_segment_index][0],10))*1000+100);
+        console.log(parseFloat(clip_segments[current_segment_index][0],10));
+    }
 }
 
 function stopVideo() {
@@ -23,53 +28,88 @@ function nextSegment() {
         stopVideo();
     }else {
         current_segment_index++;
-        console.log(parseFloat(clip_segments[current_segment_index][0],10));
         player.seekTo(parseFloat(clip_segments[current_segment_index][0],10));
-        setTimeout(nextSegment, (parseFloat(clip_segments[current_segment_index][1],10)-parseFloat(clip_segments[current_segment_index][0],10))*1000+100);
     }
 }
 
-// drop event
-$(function(){
-    var droppable = $("#droppable");
-
-    if(!window.FileReader) {
-        alert("File API がサポートされていません。");
-    }
-    var cancelEvent = function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-    droppable.bind("dragenter", cancelEvent);
-    droppable.bind("dragover", cancelEvent);
-
-    var handleDroppedFile = function(event) {
-        var file = event.originalEvent.dataTransfer.files[0];
-        var fileReader = new FileReader();
-        fileReader.onload = function(event) {
-
-            console.log(event.target.result);
-            var tmp = event.target.result.split("\n");
-            var video_id = tmp[0].match(/v=.*/)[0].substring(2);
-            for(var i=1;i<tmp.length-1;i++){
-                clip_segments[i-1] = tmp[i].split(',');
-            }
-            player = new YT.Player('player', {
-                height: '360',
-                width: '640',
-                videoId: video_id,
-                events: {
-                    'onReady': onPlayerReady,
-                }
-            });
-            current_segment_index = 0;
-            console.log(parseFloat(clip_segments[current_segment_index][0],10));
-
+$('input#urlPost').on('click', function(){
+    var formData = $('#urlPost').serialize();
+    console.log("送信:"+formData);
+    $.ajax({
+        url: '/post_url',
+        type: 'post',
+        data: formData
+    }).done(function(data) {
+        var response = JSON.parse(data)[0];
+        var video_id = ""
+        if(response == "making"){
+            document.getElementById('res').innerHTML='要約動画を作成中です。少々お待ちください';
+            setTimeout(retry_post,30000,formData);
+            return false;
+        }else if (response == "crowd") {
+            document.getElementById('res').innerHTML='ただいま込み合っています。少々お待ちください';
+            setTimeout(retry_post,60000,formData);
+            return false;
+        }else if (response == "error"){
+            document.getElementById('res').innerHTML='要約の作成に失敗しています';
+            return false;
+        }else{
+            video_id=response;
+            document.getElementById('res').innerHTML='';
         }
-        fileReader.readAsText(file);
+        clip_segments = JSON.parse(data).slice(1);
+        player = new YT.Player('player', {
+            height: '360',
+            width: '640',
+            videoId: video_id,
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+        current_segment_index = 0;
+        console.log(parseFloat(clip_segments[current_segment_index][0],10));
 
-        cancelEvent(event);
-    }
-
-    droppable.bind("drop", handleDroppedFile);
+    });
+    return false;
 });
+
+function retry_post(formData){
+    console.log("送信:"+formData);
+    $.ajax({
+        url: '/post_url',
+        type: 'post',
+        data: formData
+    }).done(function(data) {
+        var response = JSON.parse(data)[0];
+        var video_id = ""
+        if(response == "making"){
+            document.getElementById('res').innerHTML='要約動画を作成中です。少々お待ちください';
+            setTimeout(retry_post,30000,formData);
+            return false;
+        }else if (response == "crowd") {
+            document.getElementById('res').innerHTML='ただいま込み合っています。少々お待ちください';
+            setTimeout(retry_post,60000,formData);
+            return false;
+        }else if (response == "error"){
+            document.getElementById('res').innerHTML='要約の作成に失敗しています';
+            return false;
+        }else{
+            video_id=response;
+        }
+        clip_segments = JSON.parse(data).slice(1);
+        player = new YT.Player('player', {
+            height: '360',
+            width: '640',
+            videoId: video_id,
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+        current_segment_index = 0;
+        console.log(parseFloat(clip_segments[current_segment_index][0],10));
+
+    });
+    return false;
+}

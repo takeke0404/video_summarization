@@ -1,1 +1,8 @@
 flask
+youtube_dl
+beautifulsoup4
+retry
+requests
+inaSpeechSegmenter
+numpy
+tensorflow

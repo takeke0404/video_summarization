@@ -37,7 +37,7 @@ services:
     web:
         build: ./web
         ports:
-          - 80:80
+          - 32768:80
         volumes:
           - ./web:/web
         tty: true

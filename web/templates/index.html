@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html>
 <body>
-    <div>
-        <div id="droppable" style="border: gray solid 5px; padding: 2px; width:250px; height:50px;">
-            ここにファイルをドラッグ＆ドロップ
-        </div>
-    </div>
-    <div style="height:360px;">
+    <form id="urlPost" action="javascript:void(0);" style="height:40px;">
+        <input id="youtube_url" type="text" name="youtube_url" style="height:30px;">
+        <input id="urlPost" type="submit" style="height:30px;"/>
+    </form>
+    <div id="res"></div>
+    <div style="height:370px;">
         <div id="player"></div>
     </div>
+    {% for url,name in name_list %}
+    <div>{{url}}</div><div>{{name}}</div><br>
+    {% endfor %}
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script src="static/js/main.js"></script>
 </body>
