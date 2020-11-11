@@ -24,13 +24,13 @@ def main(name):
     clip_segments = []
     while flag:
         n+=1
-        # 時間当たりコメント数(10-40秒までの畳み込み和,要約の長さまで上位n件)
+        # 時間当たりコメント数(30秒までの畳み込み和,要約の長さまで上位n件)
         comment_begin = comments_list[0][0]
         comment_end = comments_list[-1][0]
         comments_per_sec = np.zeros(comment_end - comment_begin + 1)
         for comment in comments_list:
             comments_per_sec[comment[0] - comment_begin] += 1
-        comment_count = np.convolve(comments_per_sec,[0]*10+[2]*10+[1]*20,)[40:]
+        comment_count = np.convolve(comments_per_sec,[2]*20+[1]*10,)[30:]
         times = np.sort(np.argpartition(comment_count, -n)[-n:])
 
         # コメントが多かった部分を含む音声区間を抽出
