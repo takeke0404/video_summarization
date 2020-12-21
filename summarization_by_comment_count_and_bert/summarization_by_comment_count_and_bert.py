@@ -9,6 +9,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 clip_length=300
 
 def main(name):
+    predict=[]
+    with open('../summarization_by_bert/predict_result/'+name+'.csv') as f:
+        for t,s,e,a,b in csv.reader(f):
+            predict.append([float(s),float(e),float(a),float(b)])
+
     # 読み込み
     comments_json = json.load(open('../get_video/comments/'+name+'.json', "r", encoding="UTF-8"))
 
@@ -32,6 +37,8 @@ def main(name):
         for row in csv.reader(f):
             seg.append(row)
 
+    m=np.percentile(predict,q=95,axis=0)[2]
+    print(m)
     n=0
     pre_len=0
     flag=True
@@ -45,10 +52,15 @@ def main(name):
         time = time[0]
 
         # コメントが多かった部分を含む音声区間を抽出
-        m=0.6
         prev = ("",0,0)
         for type,start,end in seg:
             if(float(start)<=time and time<=float(end)):
+                x=0
+                for s,e,a,b in predict:
+                    if(float(e)==float(end)):
+                        x=b
+                if( x<m ):
+                    break
                 # 検出された区間のひとつ前のnoEnergy,noise以外の区間を結合
                 clip_segments.append(prev)
                 # 検出された区間の結合
@@ -64,14 +76,16 @@ def main(name):
         clip_segments = taple_join(clip_segments,5)
         length=0
         for t,s,e in clip_segments:
-            length+=e-s
+            if(e-s<5):
+                clip_segments.remove((t,s,e))
+            else:
+                length+=e-s
         if (length>clip_length):
             flag=False
         else:
             if(pre_len!=len(clip_segments)):
                 print(str(int(length/clip_length*100))+"/100")
                 pre_len=len(clip_segments)
-
     print(clip_segments)
     output_comment(name,clip_segments,comments_list)
     output_wav(name,clip_segments)

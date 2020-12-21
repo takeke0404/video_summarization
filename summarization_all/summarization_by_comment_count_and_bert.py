@@ -9,8 +9,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 clip_length=300
 
 def main(name):
+    predict=[]
+    with open('./predict_result/'+name+'.csv') as f:
+        for t,s,e,a,b in csv.reader(f):
+            predict.append([float(s),float(e),float(a),float(b)])
+
     # 読み込み
-    comments_json = json.load(open('../get_video/comments/'+name+'.json', "r", encoding="UTF-8"))
+    comments_json = json.load(open('./comments/'+name+'.json', "r", encoding="UTF-8"))
 
     # 時刻と内容の抽出
     comments_list = []
@@ -28,10 +33,12 @@ def main(name):
     comment_count = np.convolve(comments_per_sec,[2]*20+[1]*10,)[30:]
 
     seg=[]
-    with open("../speech_segmentation/segmentation/"+name+".csv") as f:
+    with open("./segmentation/"+name+".csv") as f:
         for row in csv.reader(f):
             seg.append(row)
 
+    m=np.percentile(predict,q=95,axis=0)[3]
+    print(m)
     n=0
     pre_len=0
     flag=True
@@ -45,10 +52,15 @@ def main(name):
         time = time[0]
 
         # コメントが多かった部分を含む音声区間を抽出
-        m=0.6
         prev = ("",0,0)
         for type,start,end in seg:
             if(float(start)<=time and time<=float(end)):
+                x=0
+                for s,e,a,b in predict:
+                    if(float(e)==float(end)):
+                        x=b
+                if( x<m ):
+                    break
                 # 検出された区間のひとつ前のnoEnergy,noise以外の区間を結合
                 clip_segments.append(prev)
                 # 検出された区間の結合
@@ -64,24 +76,25 @@ def main(name):
         clip_segments = taple_join(clip_segments,5)
         length=0
         for t,s,e in clip_segments:
-            length+=e-s
+            if(e-s<5):
+                clip_segments.remove((t,s,e))
+            else:
+                length+=e-s
         if (length>clip_length):
             flag=False
         else:
             if(pre_len!=len(clip_segments)):
                 print(str(int(length/clip_length*100))+"/100")
                 pre_len=len(clip_segments)
-
     print(clip_segments)
     output_comment(name,clip_segments,comments_list)
-    output_wav(name,clip_segments)
     # urlを先頭につけてcsvで書き出し
     url=""
-    with open('../get_video/name_list.txt') as f:
+    with open('./name_list.txt') as f:
         for video_url,video_name in csv.reader(f):
             if(video_name==name):
                 url=video_url
-    with open('result/'+name+".csv",mode='w') as f:
+    with open('result_by_comment_count_and_bert/'+name+".csv",mode='w') as f:
         print(*url, sep='',file=f)
         for type,start,end in clip_segments:
             print(*(round(start,2),round(end,2)), sep=',', file=f)
@@ -113,53 +126,6 @@ def taple_join(taple,n):
             result.append((typet,st,et))
     return result
 
-def output_wav(name,clip_segments):
-    # 音声clip出力
-    wf = wave.open('../get_video/videos/'+name+'.wav', mode="rb")
-    channel = wf.getnchannels()
-    framerate = wf.getframerate()
-    sampwidth = wf.getsampwidth()
-
-    if wf.getnframes() < 1000000000:
-        buffer = wf.readframes(-1)
-        wf.close()
-    else:
-        wf.close()
-        print("RELOAD")
-        wf2 = open('../get_video/videos/'+name+'.wav', "rb")
-        print("", wf2.read(4)) # RIFF
-        wf2.read(4) # ファイルサイズ
-        print("", wf2.read(4)) # WAVE
-        while True:
-            t = wf2.read(4) # チャンク名
-            s = int.from_bytes(wf2.read(4), "little") # チャンクサイズ
-            print("", t, s)
-            if t == b"data":
-                break
-            wf2.read(s) # チャンク飛ばす
-        buffer = wf2.read()
-
-    w = np.frombuffer(buffer, dtype="int16")
-    if channel == 1:
-        # モノラル
-        mw = w
-    elif channel == 2:
-        # ステレオ
-        lw = w[ : : 2]
-        rw = w[1 : : 2]
-        mw = (lw >> 1) + (rw >> 1)
-    else:
-        mw = np.empty(0)
-    ww = np.empty(0,dtype="int16")
-    for type,start,end in clip_segments:
-        ww = np.append(ww,mw[int(round(start,2)*framerate):int(round(end,2)*framerate)])
-
-    of = wave.open("clips/"+name+".wav","wb")
-    of.setparams((channel,sampwidth,framerate,len(ww),"NONE", "not compressed"))
-    of.writeframes(ww)
-    of.close()
-    return
-
 def output_comment(name,clip_segments,comments_list):
     #  範囲のコメントをファイル出力
     clip_comment = []
@@ -170,7 +136,7 @@ def output_comment(name,clip_segments,comments_list):
             if( start+10<time and time<end+10 ):
                 t+=text.replace(',','').replace("　","")
         clip_comment.append(t)
-    with open('comments/'+name+".txt",mode='w') as f:
+    with open('comments_by_comment_count_and_bert/'+name+".txt",mode='w') as f:
         for row in clip_comment:
             print(*row, sep='', file=f)
     return

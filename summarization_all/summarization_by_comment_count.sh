@@ -1,5 +1,5 @@
 #!/bin/sh
-positions="../get_clip_position/positions/*"
+positions="./videos/*"
 for filename in $positions; do
     name=${filename##*/}
     name=${name%.*}

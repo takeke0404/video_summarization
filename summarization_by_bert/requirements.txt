@@ -1,0 +1,7 @@
+tensorflow
+numpy
+keras_bert
+keras
+pandas
+sentencepiece
+sklearn

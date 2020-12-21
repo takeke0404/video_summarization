@@ -12,13 +12,6 @@ services:
             - ./get_video:/get_video:ro
             - ./get_clip_position:/get_clip_position
         command: bash -c "bash get_clip_position_multiple.sh && bash change_permission.sh"
-    analyze_comment:
-        build: ./analyze_comment
-        volumes:
-            - ./analyze_comment:/analyze_comment
-            - ./get_video:/get_video
-            - ./get_clip_position:/get_clip_position
-        command: bash -c "bash plot_comment.sh && bash get_clip_comment.sh && bash change_permission.sh"
     speech_segmentation:
         build: ./speech_segmentation
         volumes:
@@ -34,6 +27,48 @@ services:
             - ./get_video:/get_video
             - ./get_clip_position:/get_clip_position
         command: bash -c "bash summarization_by_comment_count.sh"
+    make_bert_data:
+        build: ./make_bert_data
+        volumes:
+            - ./make_bert_data:/make_bert_data
+            - ./summarization_by_comment_count:/summarization_by_comment_count
+            - ./speech_segmentation:/speech_segmentation
+            - ./get_video:/get_video
+            - ./get_clip_position:/get_clip_position
+            - ./bert_train:/bert_train
+        command: bash -c "bash make_bert_data.sh && bash separate_data.sh && python join_data.py && bash copy_file.sh"
+    summarization_by_bert:
+        build: ./summarization_by_bert
+        volumes:
+            - ./get_video:/get_video
+            - ./speech_segmentation:/speech_segmentation
+            - ./summarization_by_bert:/summarization_by_bert
+            - ./get_clip_position:/get_clip_position
+        command: bash summarization_by_bert.sh
+    summarization_by_comment_count_and_bert:
+        build: ./summarization_by_comment_count_and_bert
+        volumes:
+            - ./summarization_by_comment_count_and_bert:/summarization_by_comment_count_and_bert
+            - ./get_video:/get_video
+            - ./speech_segmentation:/speech_segmentation
+            - ./summarization_by_bert:/summarization_by_bert
+            - ./get_clip_position:/get_clip_position
+        command: bash summarization_by_comment_count_and_bert.sh
+    summarization_all:
+        build: ./summarization_all
+        volumes:
+            - ./summarization_all:/summarization_all
+        command: bash summarization_all.sh
+    analyze_comment:
+        build: ./analyze_comment
+        volumes:
+            - ./analyze_comment:/analyze_comment
+            - ./get_video:/get_video
+            - ./get_clip_position:/get_clip_position
+            - ./summarization_by_comment_count:/summarization_by_comment_count
+            - ./summarization_by_bert:/summarization_by_bert
+            - ./summarization_by_comment_count_and_bert:/summarization_by_comment_count_and_bert
+        command: bash -c "bash plot_comment.sh && bash get_clip_comment.sh && bash change_permission.sh"
     web:
         build: ./web
         ports:

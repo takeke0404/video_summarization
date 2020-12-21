@@ -1,5 +1,8 @@
 #!/bin/sh
 video_id=${1##*=}
+mkdir positions
+mkdir output
+mkdir clips
 if [ -f "./positions/$2.csv" ]; then
     echo "positions/$2.csv exists"
 else

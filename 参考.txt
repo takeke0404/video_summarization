@@ -5,3 +5,7 @@ https://shigeo-t.hatenablog.com/entry/2019/11/24/050000 JuliusでYouTubeから�
 https://qiita.com/ikuo0/items/0d5798db824f3df074af 音声有効区間とモーラの検出
 https://ledge.ai/bert/ BERTとは｜Googleが誇る自然言語処理モデルの特徴、仕組みを解説
 https://qiita.com/g-k/items/5ea94c13281f675302ca Doc2Vecについてまとめる
+https://rightcode.co.jp/blog/information-technology/neural-network-learning-visualization
+https://tech-blog.cloud-config.jp/2020-02-06-category-classification-using-bert/
+https://www.inoue-kobo.com/ai_ml/keras-bert/index.html
+https://blog.shikoan.com/save-models-between-cpu-and-tpu-in-tf20/

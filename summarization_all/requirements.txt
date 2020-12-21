@@ -1,0 +1,14 @@
+youtube_dl
+beautifulsoup4
+requests
+retry
+numpy
+matplotlib
+scipy
+tensorflow
+inaSpeechSegmenter
+keras_bert
+keras
+pandas
+sentencepiece
+sklearn

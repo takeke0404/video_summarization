@@ -5,10 +5,9 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 
-def main(comment_file):
-    print("LOAD", comment_file)
-    comments_json = json.load(open(comment_file, "r", encoding="UTF-8"))
-    comment_file_name = os.path.splitext(os.path.basename(comment_file))[0]
+def main(comment_file_name):
+    print("LOAD", comment_file_name)
+    comments_json = json.load(open("./comments/"+comment_file_name+".json", "r", encoding="UTF-8"))
 
     # 時刻と内容の抽出
     comments_list = []
@@ -24,27 +23,27 @@ def main(comment_file):
     for comment in comments_list:
         comments_per_sec[comment[0] - comment_begin] += 1
 
-    # 時間当たりコメント数plot
+    # clipの範囲plot
     fig = plt.figure(figsize=(20,3),dpi=100)
     plt.subplot(2, 1, 1)
     for i in range(- comment_begin, len(comments_per_sec), 3600):
         plt.vlines(i, 0, np.max(comments_per_sec), "grey", linestyles="dashed")
     plt.plot(comments_per_sec)
-    with open("../get_clip_position/positions/"+comment_file_name+".csv") as f:
+    with open("./clip_position/"+comment_file_name+".csv") as f:
         for row in csv.reader(f):
             a,b=row
-            plt.axvspan(int(int(a)/48000),int(int(b)/48000),color="r", alpha=0.3)
+            plt.axvspan(int(int(a)/48000),int(int(b)/48000),color="y", alpha=0.3)
 
     plt.subplot(2, 1, 2)
     a = 10
     plt.plot(np.convolve(comments_per_sec, np.full(10, 1 / a)))
-    with open("../get_clip_position/positions/"+comment_file_name+".csv") as f:
+    with open("./clip_position/"+comment_file_name+".csv") as f:
         for row in csv.reader(f):
             a,b=row
-            plt.axvspan(int(int(a)/48000),int(int(b)/48000),color="r", alpha=0.3)
+            plt.axvspan(int(int(a)/48000),int(int(b)/48000),color="y", alpha=0.3)
 
-    os.makedirs("comment_plot/", exist_ok=True)
-    fig.savefig("./comment_plot/"+comment_file_name+".png")
+    os.makedirs("plot_by_clip/", exist_ok=True)
+    fig.savefig("./plot_by_clip/"+comment_file_name+".png")
 
     #コメント数での要約映像
     fig = plt.figure(figsize=(20,3),dpi=100)
@@ -52,29 +51,29 @@ def main(comment_file):
     for i in range(- comment_begin, len(comments_per_sec), 3600):
         plt.vlines(i, 0, np.max(comments_per_sec), "grey", linestyles="dashed")
     plt.plot(comments_per_sec)
-    with open("../summarization_by_comment_count/result/"+comment_file_name+".csv") as f:
+    with open("./result_by_comment_count/"+comment_file_name+".csv") as f:
         count=0
         for row in csv.reader(f):
             if(count==0):
                 count+=1
                 continue
             a,b=row
-            plt.axvspan(float(a),float(b),color="y", alpha=0.3)
+            plt.axvspan(float(a),float(b),color="r", alpha=0.3)
 
     plt.subplot(2, 1, 2)
     a = 10
     plt.plot(np.convolve(comments_per_sec, np.full(10, 1 / a)))
-    with open("../summarization_by_comment_count/result/"+comment_file_name+".csv") as f:
+    with open("./result_by_comment_count/"+comment_file_name+".csv") as f:
         count=0
         for row in csv.reader(f):
             if(count==0):
                 count+=1
                 continue
             a,b=row
-            plt.axvspan(float(a),float(b),color="y", alpha=0.3)
+            plt.axvspan(float(a),float(b),color="r", alpha=0.3)
 
-    os.makedirs("by_comment_count/", exist_ok=True)
-    fig.savefig("./by_comment_count/"+comment_file_name+".png")
+    os.makedirs("plot_by_comment_count/", exist_ok=True)
+    fig.savefig("./plot_by_comment_count/"+comment_file_name+".png")
 
     #bertでの要約映像
     fig = plt.figure(figsize=(20,3),dpi=100)
@@ -82,7 +81,7 @@ def main(comment_file):
     for i in range(- comment_begin, len(comments_per_sec), 3600):
         plt.vlines(i, 0, np.max(comments_per_sec), "grey", linestyles="dashed")
     plt.plot(comments_per_sec)
-    with open("../summarization_by_bert/result/"+comment_file_name+".csv") as f:
+    with open("./result_by_bert/"+comment_file_name+".csv") as f:
         count=0
         for row in csv.reader(f):
             if(count==0):
@@ -94,7 +93,7 @@ def main(comment_file):
     plt.subplot(2, 1, 2)
     a = 10
     plt.plot(np.convolve(comments_per_sec, np.full(10, 1 / a)))
-    with open("../summarization_by_bert/result/"+comment_file_name+".csv") as f:
+    with open("./result_by_bert/"+comment_file_name+".csv") as f:
         count=0
         for row in csv.reader(f):
             if(count==0):
@@ -103,8 +102,8 @@ def main(comment_file):
             a,b=row
             plt.axvspan(float(a),float(b),color="g", alpha=0.3)
 
-    os.makedirs("by_bert/", exist_ok=True)
-    fig.savefig("./by_bert/"+comment_file_name+".png")
+    os.makedirs("plot_by_bert/", exist_ok=True)
+    fig.savefig("./plot_by_bert/"+comment_file_name+".png")
 
     #bert+commentでの要約映像
     fig = plt.figure(figsize=(20,3),dpi=100)
@@ -112,7 +111,7 @@ def main(comment_file):
     for i in range(- comment_begin, len(comments_per_sec), 3600):
         plt.vlines(i, 0, np.max(comments_per_sec), "grey", linestyles="dashed")
     plt.plot(comments_per_sec)
-    with open("../summarization_by_comment_count_and_bert/result/"+comment_file_name+".csv") as f:
+    with open("./result_by_comment_count_and_bert/"+comment_file_name+".csv") as f:
         count=0
         for row in csv.reader(f):
             if(count==0):
@@ -124,7 +123,7 @@ def main(comment_file):
     plt.subplot(2, 1, 2)
     a = 10
     plt.plot(np.convolve(comments_per_sec, np.full(10, 1 / a)))
-    with open("../summarization_by_comment_count_and_bert/result/"+comment_file_name+".csv") as f:
+    with open("./result_by_comment_count_and_bert/"+comment_file_name+".csv") as f:
         count=0
         for row in csv.reader(f):
             if(count==0):
@@ -133,8 +132,8 @@ def main(comment_file):
             a,b=row
             plt.axvspan(float(a),float(b),color="b", alpha=0.3)
 
-    os.makedirs("by_comment_count_and_bert/", exist_ok=True)
-    fig.savefig("./by_comment_count_and_bert/"+comment_file_name+".png")
+    os.makedirs("plot_by_comment_count_and_bert/", exist_ok=True)
+    fig.savefig("./plot_by_comment_count_and_bert/"+comment_file_name+".png")
 
 
 def time2sec(time_str):

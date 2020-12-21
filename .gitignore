@@ -11,3 +11,15 @@
 /analyze_comment/__pycache__/*
 /analyze_comment/comments/*
 /log_data/*
+/summarization_all/clip_position_output/*
+/summarization_all/comments_by_comment_count/*
+/summarization_all/comments_by_comment_count_and_bert/*
+/summarization_by_comment_count_and_bert/comments/*
+*.wav
+*.h5
+*.csv
+*.json
+*.png
+model.*
+*.model
+*.vocab
